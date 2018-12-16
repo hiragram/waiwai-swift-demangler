@@ -97,15 +97,13 @@ class Parser {
     func parseListTypeElement() -> [Type] {
         if remains.first == "_" {
             skip(length: 1)
-            let headType = parseKnownType()
-            return [headType] + parseListTypeElement()
-        } else if remains.first == "t" {
+        }
+        if remains.first == "t" {
             skip(length: 1)
             return []
-        } else {
-            let headType = parseKnownType()
-            return [headType] + parseListTypeElement()
         }
+        let headType = parseKnownType()
+        return [headType] + parseListTypeElement()
     }
 
     func parseType() -> Type {
@@ -117,28 +115,25 @@ class Parser {
             return headType
         }
     }
-}
 
-enum Type: Equatable {
-    case bool
-    case int
-    case string
-    case float
-    indirect case list([Type])
+    func parseFunctionSignature() -> FunctionSignature {
+        let returnType = parseType()
+        let argsType = parseType()
 
-    init(name: String) {
-        switch name {
-        case "i":
-            self = .int
-        case "b":
-            self = .bool
-        case "S":
-            self = .string
-        case "f":
-            self = .float
-        default:
-            fatalError()
-        }
-        // todo: listサポート
+        return FunctionSignature.init(returnType: returnType, argsType: argsType)
+    }
+
+    func parseFunctionEntity() -> FunctionEntity {
+        let module = parseModule()
+        let declName = parseDeclName()
+        let labelList = parseLabelList()
+        let functionSignature = parseFunctionSignature()
+
+        return FunctionEntity.init(
+            module: module,
+            declName: declName,
+            labelList: labelList,
+            functionSignature: functionSignature
+        )
     }
 }

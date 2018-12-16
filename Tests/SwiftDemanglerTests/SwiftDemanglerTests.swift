@@ -34,7 +34,7 @@ final class SwiftDemanglerTests: XCTestCase {
 //        XCTAssertEqual(parser.remains, "B2A")
 //        XCTAssertEqual(parser.parseInt(), nil)
 //    }
-
+//
 //    func testParseIdentifier() {
 //        let parser = Parser(name: "3ABC4DEFG")
 //
@@ -48,18 +48,18 @@ final class SwiftDemanglerTests: XCTestCase {
 //        XCTAssertEqual(parser.parseIdentifier(length: 4), "DEFG")
 //    }
 
-//    func testParseIdentifierWithoutArguments() {
-//        let parser = Parser(name: "3ABC4DEFG")
-//        XCTAssertEqual(parser.parseIdentifier(), "ABC")
-//        XCTAssertEqual(parser.remains, "4DEFG")
-//        XCTAssertEqual(parser.parseIdentifier(), "DEFG")
-//    }
+    func testParseIdentifierWithoutArguments() {
+        let parser = Parser(name: "3ABC4DEFG")
+        XCTAssertEqual(parser.parseIdentifier(), "ABC")
+        XCTAssertEqual(parser.remains, "4DEFG")
+        XCTAssertEqual(parser.parseIdentifier(), "DEFG")
+    }
 
-//    func testParseModule() {
-//        let parser = Parser(name: "$S13ExampleNumber6isEven6numberSbSi_tF")
-//        let _ = parser.parsePrefix()
-//        XCTAssertEqual(parser.parseModule(), "ExampleNumber")
-//    }
+    func testParseModule() {
+        let parser = Parser(name: "$S13ExampleNumber6isEven6numberSbSi_tF")
+        let _ = parser.parsePrefix()
+        XCTAssertEqual(parser.parseModule(), "ExampleNumber")
+    }
 
     func testParseKnownType() {
         XCTAssertEqual(Parser(name: "Si").parseKnownType(), .int)
@@ -74,6 +74,23 @@ final class SwiftDemanglerTests: XCTestCase {
         XCTAssertEqual(Parser(name: "SS").parseType(), .string)
         XCTAssertEqual(Parser(name: "Sf").parseType(), .float)
         XCTAssertEqual(Parser(name: "Sf_SfSft").parseType(), .list([.float, .float, .float]))
+    }
+
+    func testParseFunctionSignature() {
+        XCTAssertEqual(Parser(name: "SbSi_t").parseFunctionSignature(), FunctionSignature(returnType: .bool, argsType: .list([.int])))
+    }
+
+    func testParseFunctionEntity() {
+        let sig = FunctionSignature(returnType: .bool, argsType: .list([.int]))
+        XCTAssertEqual(Parser(name: "13ExampleNumber6isEven6numberSbSi_tF").parseFunctionEntity(),
+                       FunctionEntity(module: "ExampleNumber", declName: "isEven", labelList: ["number"], functionSignature: sig))
+    }
+
+    func testDisplayString() {
+
+        let entity = FunctionEntity.init(module: "ExampleNumber", declName: "isEven", labelList: ["number"], functionSignature: FunctionSignature(returnType: .bool, argsType: .list([.int])))
+
+        XCTAssertEqual(entity.description, "ExampleNumber.isEven(number: Swift.Int) -> Swift.Bool")
     }
 
     static var allTests = [
