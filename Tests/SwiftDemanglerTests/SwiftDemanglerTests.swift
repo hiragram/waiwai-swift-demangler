@@ -48,17 +48,32 @@ final class SwiftDemanglerTests: XCTestCase {
 //        XCTAssertEqual(parser.parseIdentifier(length: 4), "DEFG")
 //    }
 
-    func testParseIdentifierWithoutArguments() {
-        let parser = Parser(name: "3ABC4DEFG")
-        XCTAssertEqual(parser.parseIdentifier(), "ABC")
-        XCTAssertEqual(parser.remains, "4DEFG")
-        XCTAssertEqual(parser.parseIdentifier(), "DEFG")
+//    func testParseIdentifierWithoutArguments() {
+//        let parser = Parser(name: "3ABC4DEFG")
+//        XCTAssertEqual(parser.parseIdentifier(), "ABC")
+//        XCTAssertEqual(parser.remains, "4DEFG")
+//        XCTAssertEqual(parser.parseIdentifier(), "DEFG")
+//    }
+
+//    func testParseModule() {
+//        let parser = Parser(name: "$S13ExampleNumber6isEven6numberSbSi_tF")
+//        let _ = parser.parsePrefix()
+//        XCTAssertEqual(parser.parseModule(), "ExampleNumber")
+//    }
+
+    func testParseKnownType() {
+        XCTAssertEqual(Parser(name: "Si").parseKnownType(), .int)
+        XCTAssertEqual(Parser(name: "Sb").parseKnownType(), .bool)
+        XCTAssertEqual(Parser(name: "SS").parseKnownType(), .string)
+        XCTAssertEqual(Parser(name: "Sf").parseKnownType(), .float)
     }
 
-    func testParseModule() {
-        let parser = Parser(name: "$S13ExampleNumber6isEven6numberSbSi_tF")
-        let _ = parser.parsePrefix()
-        XCTAssertEqual(parser.parseModule(), "ExampleNumber")
+    func testParseType() {
+        XCTAssertEqual(Parser(name: "Si").parseType(), .int)
+        XCTAssertEqual(Parser(name: "Sb").parseType(), .bool)
+        XCTAssertEqual(Parser(name: "SS").parseType(), .string)
+        XCTAssertEqual(Parser(name: "Sf").parseType(), .float)
+        XCTAssertEqual(Parser(name: "Sf_SfSft").parseType(), .list([.float, .float, .float]))
     }
 
     static var allTests = [

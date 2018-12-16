@@ -31,7 +31,7 @@ class Parser {
             }
         }
 
-        index = name.index(index, offsetBy: integerStr.count)
+        skip(length: integerStr.count)
 
         return Int.init(integerStr)
     }
@@ -39,7 +39,7 @@ class Parser {
     private func parseIdentifier(length: Int) -> String {
         let identifier = String.init(remains.prefix(length))
 
-        index = name.index(index, offsetBy: length)
+        skip(length: length)
 
         return identifier
     }
@@ -56,7 +56,7 @@ class Parser {
         let prefix = "$S"
         assert(remains.hasPrefix(prefix))
 
-        index = name.index(index, offsetBy: prefix.count)
+        skip(length: prefix.count)
 
         return prefix
     }
@@ -76,5 +76,69 @@ class Parser {
         }
 
         return labels
+    }
+
+    // indexはそのままに一文字先読みする
+    func peek() -> String? {
+        return remains.dropFirst().first.map(String.init)
+    }
+
+    // length分だけindexを進める
+    func skip(length: Int) {
+        index = name.index(index, offsetBy: length)
+    }
+
+    func parseKnownType() -> Type {
+        let type = Type.init(name: peek()!)
+        skip(length: 2)
+        return type
+    }
+
+    func parseListTypeElement() -> [Type] {
+        if remains.first == "_" {
+            skip(length: 1)
+            let headType = parseKnownType()
+            return [headType] + parseListTypeElement()
+        } else if remains.first == "t" {
+            skip(length: 1)
+            return []
+        } else {
+            let headType = parseKnownType()
+            return [headType] + parseListTypeElement()
+        }
+    }
+
+    func parseType() -> Type {
+        let headType = parseKnownType()
+
+        if remains.first == "_" {
+            return .list([headType] + parseListTypeElement())
+        } else {
+            return headType
+        }
+    }
+}
+
+enum Type: Equatable {
+    case bool
+    case int
+    case string
+    case float
+    indirect case list([Type])
+
+    init(name: String) {
+        switch name {
+        case "i":
+            self = .int
+        case "b":
+            self = .bool
+        case "S":
+            self = .string
+        case "f":
+            self = .float
+        default:
+            fatalError()
+        }
+        // todo: listサポート
     }
 }
